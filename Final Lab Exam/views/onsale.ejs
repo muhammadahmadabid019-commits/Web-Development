@@ -1,0 +1,158 @@
+<section class="section fade-in bg-alt">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="tag">Special Offers</span>
+      <h2>On-Sale <span class="blue">Products</span></h2>
+      <p class="sub">Grab your premium security & networking gear at massive discounts.</p>
+    </div>
+
+    <!-- On-Sale Products Grid Container -->
+    <div id="product-list" class="row g-4 justify-content-center">
+      <% if (products.length === 0) { %>
+        <div class="col-12 text-center py-5">
+          <div class="card-box p-5 d-inline-block" style="background: linear-gradient(145deg, #0a1628, #0f1f3d); border: 1px solid rgba(0,180,255,0.15); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <i class="fas fa-percentage mb-3" style="font-size: 3rem; color: #ff6b6b;"></i>
+            <h4 class="mb-2" style="color: #e8f4ff; font-weight: 700;">No Active Sales Right Now</h4>
+            <p style="color: #7a92b0;">All premium hardware is currently at standard prices. Please check back later!</p>
+            <a href="/products" class="btn btn-main mt-3">Browse Catalog</a>
+          </div>
+        </div>
+      <% } else { %>
+        <% products.forEach((product, index) => { %>
+          <!-- Each product card with a common class name: product-card-item -->
+          <div class="col-md-6 col-lg-4 product-card-item" data-index="<%= index %>">
+            <div class="product-card d-flex flex-column h-100 position-relative" style="overflow: hidden;">
+              <!-- Promo Badge -->
+              <div class="position-absolute top-0 end-0 bg-danger text-white px-3 py-1 fw-bold" style="border-bottom-left-radius: 12px; font-size: 0.8rem; z-index: 10; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(255,0,0,0.3);">
+                <i class="fas fa-fire me-1 animate-pulse"></i> ON SALE
+              </div>
+
+              <div class="prod-img">
+                <img src="<%= product.image %>" alt="<%= product.name %>" style="width: 100%; height: 100%; object-fit: cover;" />
+              </div>
+              
+              <div class="prod-body flex-grow-1 d-flex flex-column text-start">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="prod-cat"><%= product.category ? product.category.name : 'Uncategorized' %></span>
+                  <span class="text-warning small"><i class="fas fa-star"></i> <%= product.rating %></span>
+                </div>
+                <h5 style="color: #e8f4ff;"><%= product.name %></h5>
+                <p class="flex-grow-1" style="color: #7a92b0; margin-bottom: 20px;"><%= product.description.substring(0, 75) %>...</p>
+                
+                <div class="prod-footer mt-auto" style="border-top: 1px solid rgba(0,180,255,0.15); padding-top: 15px;">
+                  <div class="d-flex flex-column">
+                    <span class="text-muted text-decoration-line-through small" style="font-size: 0.8rem;">$<%= (product.price * 1.25).toFixed(2) %></span>
+                    <span class="price" style="color: #00ffc6; font-size: 1.4rem; font-weight: 700;">$<%= product.price %></span>
+                  </div>
+                  
+                  <form action="/cart/add/<%= product._id %>" method="POST" class="m-0 p-0 d-inline-block">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="btn-cart" style="background: linear-gradient(135deg, #ff6b6b, #e63946); border: none;">
+                      <i class="fas fa-cart-plus me-1"></i> Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+
+    <!-- Dedicated Placeholder Section for Pagination Controls -->
+    <% if (products.length > 0) { %>
+      <div id="pagination-controls" class="row mt-5" style="display: none;">
+        <div class="col-12 d-flex justify-content-center align-items-center gap-3">
+          <button id="prev-btn" class="btn btn-out py-2 px-4 fw-semibold" style="border-radius: 8px;" disabled>
+            <i class="fas fa-chevron-left me-2"></i> Previous
+          </button>
+          <span id="page-indicator" style="color: #a8c4e0; font-weight: 600;">Page 1 of <%= Math.ceil(products.length / 10) %></span>
+          <button id="next-btn" class="btn btn-main py-2 px-4 fw-bold" style="border-radius: 8px;">
+            Next <i class="fas fa-chevron-right ms-2"></i>
+          </button>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<!-- jQuery Frontend Pagination Logic -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+  $(document).ready(function() {
+    const itemsPerPage = 10;
+    const $products = $('.product-card-item');
+    const totalItems = $products.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    let currentPage = 1;
+
+    // Core Pagination Function
+    function updatePage() {
+      // 1. Hide all product cards
+      $products.hide();
+
+      // 2. Calculate indices
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+
+      // 3. Show only current chunk with fade-in transition
+      $products.slice(start, end).fadeIn(350);
+
+      // 4. Update dynamic text indicator
+      $('#page-indicator').text(`Page ${currentPage} of ${totalPages}`);
+
+      // 5. Button State Management
+      // Previous Button state
+      if (currentPage === 1) {
+        $('#prev-btn').prop('disabled', true).css('opacity', '0.5');
+      } else {
+        $('#prev-btn').prop('disabled', false).css('opacity', '1');
+      }
+
+      // Next Button state
+      if (currentPage === totalPages || totalPages === 0) {
+        $('#next-btn').prop('disabled', true).css('opacity', '0.5');
+      } else {
+        $('#next-btn').prop('disabled', false).css('opacity', '1');
+      }
+    }
+
+    // Initialize State
+    if (totalItems > 0) {
+      updatePage();
+      
+      // Only show controls if there are multiple pages
+      if (totalPages > 1) {
+        $('#pagination-controls').show();
+      }
+    }
+
+    // Next Button Click Handler
+    $('#next-btn').on('click', function(e) {
+      e.preventDefault();
+      if (currentPage < totalPages) {
+        currentPage++;
+        updatePage();
+        
+        // Smooth scroll back to products header
+        $('html, body').animate({
+          scrollTop: $('#product-list').offset().top - 120
+        }, 300);
+      }
+    });
+
+    // Previous Button Click Handler
+    $('#prev-btn').on('click', function(e) {
+      e.preventDefault();
+      if (currentPage > 1) {
+        currentPage--;
+        updatePage();
+        
+        // Smooth scroll back to products header
+        $('html, body').animate({
+          scrollTop: $('#product-list').offset().top - 120
+        }, 300);
+      }
+    });
+  });
+</script>

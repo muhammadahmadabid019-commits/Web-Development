@@ -1,0 +1,113 @@
+<div style="height: 80px;"></div> <!-- Spacer -->
+
+<section class="section fade-in bg-alt">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="tag">Review Your Items</span>
+      <h2>Shopping <span class="blue">Cart</span></h2>
+      <p class="sub">Proceed to checkout when you're ready.</p>
+    </div>
+
+    <div class="row g-4">
+      <!-- Cart Items -->
+      <div class="col-lg-8">
+        <div class="card-box p-4" style="background: #ffffff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #eef2f5;">
+          
+          <% if (cartItems.length === 0) { %>
+            <div class="text-center py-5">
+              <i class="fas fa-shopping-cart text-muted mb-3" style="font-size: 4rem;"></i>
+              <h4 class="text-muted fw-bold">Your cart is empty</h4>
+              <p class="text-muted mb-4">Looks like you haven't added anything yet.</p>
+              <a href="/products" class="btn btn-main py-2 px-4" style="border-radius: 8px;">Start Shopping</a>
+            </div>
+          <% } else { %>
+            
+            <% cartItems.forEach(item => { %>
+              <div class="row align-items-center mb-4 pb-4 border-bottom position-relative">
+                
+                <!-- Product Image -->
+                <div class="col-md-2 text-center">
+                  <img src="<%= item.product.image %>" alt="<%= item.product.name %>" class="img-fluid rounded" style="max-height: 80px; object-fit: contain; background: #f8f9fa; padding: 5px;">
+                </div>
+                
+                <!-- Product Details -->
+                <div class="col-md-4">
+                  <h6 class="fw-bold text-dark mb-1"><%= item.product.name %></h6>
+                  <span class="text-muted small"><%= item.product.category ? item.product.category.name : 'Uncategorized' %></span>
+                </div>
+                
+                <!-- Quantity Update -->
+                <div class="col-md-3">
+                  <form action="/cart/update/<%= item.product._id %>" method="POST" class="d-flex align-items-center justify-content-center m-0">
+                    <input type="number" name="quantity" class="form-control text-center" value="<%= item.quantity %>" min="1" max="<%= item.product.stock %>" style="width: 70px; border-radius: 8px 0 0 8px;">
+                    <button type="submit" class="btn btn-light border" style="border-radius: 0 8px 8px 0;" title="Update Quantity">
+                      <i class="fas fa-sync-alt text-primary"></i>
+                    </button>
+                  </form>
+                </div>
+                
+                <!-- Price -->
+                <div class="col-md-2 text-end">
+                  <h6 class="fw-bold text-dark m-0">$<%= (item.product.price * item.quantity).toFixed(2) %></h6>
+                  <small class="text-muted">$<%= item.product.price %> each</small>
+                </div>
+                
+                <!-- Remove Action -->
+                <div class="col-md-1 text-end">
+                  <form action="/cart/remove/<%= item.product._id %>" method="POST" class="m-0 p-0">
+                    <button type="submit" class="btn btn-link text-danger p-0 border-0" title="Remove from Cart">
+                      <i class="fas fa-trash-alt" style="font-size: 1.2rem;"></i>
+                    </button>
+                  </form>
+                </div>
+
+              </div>
+            <% }) %>
+            
+            <div class="mt-4">
+              <a href="/products" class="text-decoration-none fw-semibold text-primary"><i class="fas fa-arrow-left me-2"></i>Continue Shopping</a>
+            </div>
+
+          <% } %>
+
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <% if (cartItems.length > 0) { %>
+        <div class="col-lg-4">
+          <div class="card-box p-4 sticky-top" style="top: 100px; background: #ffffff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #eef2f5;">
+            <h5 class="fw-bold mb-4" style="color: #0a1628;">Order Summary</h5>
+            
+            <div class="d-flex justify-content-between mb-3 text-muted">
+              <span>Subtotal</span>
+              <span class="fw-semibold text-dark">$<%= subtotal %></span>
+            </div>
+            <div class="d-flex justify-content-between mb-3 text-muted">
+              <span>Tax (5%)</span>
+              <span class="fw-semibold text-dark">$<%= tax %></span>
+            </div>
+            <div class="d-flex justify-content-between mb-3 pb-3 border-bottom text-muted">
+              <span>Shipping</span>
+              <span class="fw-semibold text-dark">$<%= shipping %></span>
+            </div>
+            
+            <div class="d-flex justify-content-between mb-4 align-items-center">
+              <span class="fw-bold fs-5 text-dark">Total</span>
+              <span class="fw-bold fs-4" style="color: #1a73e8;">$<%= total %></span>
+            </div>
+            
+            <a href="#" class="btn btn-main w-100 py-3 fw-bold" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(26,115,232,0.3);">
+              Proceed to Checkout <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+            
+            <div class="mt-4 text-center text-muted small">
+              <i class="fas fa-lock me-1"></i> Secure Checkout guaranteed
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+    </div>
+  </div>
+</section>
