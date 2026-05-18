@@ -1,0 +1,143 @@
+
+
+<section class="section fade-in bg-alt">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="tag">Shop Online</span>
+      <h2>Our <span class="blue">Products</span></h2>
+      <p class="sub">Find exactly what you need with our advanced filters.</p>
+    </div>
+
+    <div class="row">
+      <!-- Sidebar Filters -->
+      <div class="col-lg-3 mb-4">
+        <div class="card-box p-4" style="text-align: left; background: linear-gradient(145deg, #0a1628, #0f1f3d); border: 1px solid rgba(0,180,255,0.15); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+          <div class="d-flex align-items-center mb-4">
+            <i class="fas fa-sliders-h me-2" style="font-size: 1.2rem; color: #00b4ff;"></i>
+            <h5 class="m-0" style="color: #e8f4ff; font-weight: 800; letter-spacing: 0.5px;">Refine Search</h5>
+          </div>
+          
+          <form action="/products" method="GET">
+            
+            <!-- Search -->
+            <div class="mb-4">
+              <label class="form-label text-uppercase tracking-wide" style="color: #a8c4e0; font-size: 0.8rem; font-weight: 700;"><i class="fas fa-search me-1"></i> Search Product</label>
+              <input type="text" name="search" class="form-control" placeholder="e.g. Camera" value="<%= query.search || '' %>" style="background: rgba(0,180,255,0.04); border: 1px solid rgba(0,180,255,0.15); color: #e8f4ff; border-radius: 8px; padding: 10px 14px;">
+            </div>
+
+            <!-- Category -->
+            <div class="mb-4">
+              <label class="form-label text-uppercase tracking-wide" style="color: #a8c4e0; font-size: 0.8rem; font-weight: 700;"><i class="fas fa-tags me-1"></i> Category</label>
+              <select name="category" class="form-select" style="background-color: rgba(0,180,255,0.04); border: 1px solid rgba(0,180,255,0.15); color: #e8f4ff; border-radius: 8px; padding: 10px 14px;">
+                <option value="" style="color: #000;">All Categories</option>
+                <% categories.forEach(cat => { %>
+                  <option value="<%= cat._id %>" <%= query.category == cat._id ? 'selected' : '' %> style="color: #000;">
+                    <%= cat.name %>
+                  </option>
+                <% }) %>
+              </select>
+            </div>
+
+            <!-- Price Range -->
+            <div class="mb-4">
+              <label class="form-label text-uppercase tracking-wide" style="color: #a8c4e0; font-size: 0.8rem; font-weight: 700;"><i class="fas fa-dollar-sign me-1"></i> Price Range</label>
+              <div class="d-flex gap-2">
+                <input type="number" name="minPrice" class="form-control" placeholder="Min" value="<%= query.minPrice || '' %>" min="0" style="background: rgba(0,180,255,0.04); border: 1px solid rgba(0,180,255,0.15); color: #e8f4ff; border-radius: 8px; padding: 10px 14px; width: 50%;">
+                <input type="number" name="maxPrice" class="form-control" placeholder="Max" value="<%= query.maxPrice || '' %>" min="0" style="background: rgba(0,180,255,0.04); border: 1px solid rgba(0,180,255,0.15); color: #e8f4ff; border-radius: 8px; padding: 10px 14px; width: 50%;">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-main w-100 py-2 fw-bold" style="border-radius: 8px; margin-top: 10px;"><i class="fas fa-filter"></i> Apply Filters</button>
+            <a href="/products" class="btn btn-out w-100 mt-3 text-center fw-semibold hover-dark" style="border-radius: 8px; display: block; padding: 10px;">Clear All</a>
+          </form>
+        </div>
+      </div>
+
+      <!-- Product Grid -->
+      <div class="col-lg-9">
+        <% if (products.length === 0) { %>
+          <div class="text-center py-5">
+            <h4 class="text-muted">No products found matching your criteria.</h4>
+            <a href="/products" class="btn btn-main mt-3">Reset Filters</a>
+          </div>
+        <% } else { %>
+          <div class="row g-4">
+            <% products.forEach(product => { %>
+              <div class="col-md-6 col-lg-4">
+                <div class="product-card d-flex flex-column h-100">
+                  <div class="prod-img">
+                    <img src="<%= product.image %>" alt="<%= product.name %>" style="width: 100%; height: 100%; object-fit: cover;" />
+                  </div>
+                  <div class="prod-body flex-grow-1 d-flex flex-column text-start">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="prod-cat"><%= product.category ? product.category.name : 'Uncategorized' %></span>
+                      <span class="text-warning small"><i class="fas fa-star"></i> <%= product.rating %></span>
+                    </div>
+                    <h5 style="color: #e8f4ff;"><%= product.name %></h5>
+                    <p class="flex-grow-1" style="color: #7a92b0; margin-bottom: 20px;"><%= product.description.substring(0, 60) %>...</p>
+                    <div class="prod-footer mt-auto" style="border-top: 1px solid rgba(0,180,255,0.15); padding-top: 15px;">
+                      <span class="price" style="color: #00ffc6;">$<%= product.price %></span>
+                      <form action="/cart/add/<%= product._id %>" method="POST" class="m-0 p-0 d-inline-block">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn-cart">
+                          <i class="fas fa-cart-plus"></i> Add
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+
+          <!-- Pagination -->
+          <% if (totalPages > 1) { %>
+            <nav class="mt-5" aria-label="Product navigation">
+              <ul class="pagination justify-content-center custom-pagination">
+                <!-- Previous Button -->
+                <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                  <a class="page-link" href="?page=<%= currentPage - 1 %><%= query.search ? '&search=' + query.search : '' %><%= query.category ? '&category=' + query.category : '' %><%= query.minPrice ? '&minPrice=' + query.minPrice : '' %><%= query.maxPrice ? '&maxPrice=' + query.maxPrice : '' %>" tabindex="-1">Previous</a>
+                </li>
+                
+                <!-- Page Numbers -->
+                <% for(let i = 1; i <= totalPages; i++) { %>
+                  <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %><%= query.search ? '&search=' + query.search : '' %><%= query.category ? '&category=' + query.category : '' %><%= query.minPrice ? '&minPrice=' + query.minPrice : '' %><%= query.maxPrice ? '&maxPrice=' + query.maxPrice : '' %>"><%= i %></a>
+                  </li>
+                <% } %>
+                
+                <!-- Next Button -->
+                <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                  <a class="page-link" href="?page=<%= currentPage + 1 %><%= query.search ? '&search=' + query.search : '' %><%= query.category ? '&category=' + query.category : '' %><%= query.minPrice ? '&minPrice=' + query.minPrice : '' %><%= query.maxPrice ? '&maxPrice=' + query.maxPrice : '' %>">Next</a>
+                </li>
+              </ul>
+            </nav>
+          <% } %>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Inline style for custom pagination to match theme -->
+<style>
+  .custom-pagination .page-link {
+    color: #0a1628;
+    border-color: #dee2e6;
+    margin: 0 4px;
+    border-radius: 8px;
+  }
+  .custom-pagination .page-item.active .page-link {
+    background-color: #1a73e8;
+    border-color: #1a73e8;
+    color: white;
+  }
+  .custom-pagination .page-link:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #0a1628;
+  }
+  .custom-pagination .page-item.disabled .page-link {
+    color: #6c757d;
+  }
+</style>
